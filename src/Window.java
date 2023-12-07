@@ -25,6 +25,7 @@ public class Window extends JFrame{
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setPreferredSize(new Dimension(1280, 720));
         this.setLayout(new BorderLayout());
+        this.pack();
 
         HUD = new JPanel();
         DESC = new JPanel();
@@ -37,7 +38,9 @@ public class Window extends JFrame{
         DESC.setBackground(new Color(17, 25, 38));
         OPTIONS.setPreferredSize(new Dimension(304,100));
         OPTIONS.setBackground(new Color(237, 242, 252));
-        MAIN_WINDOW.setPreferredSize(new Dimension(640,640));
+
+        resize();
+
         MAIN_WINDOW.setBackground(Color.WHITE);
 
         DESC.setLayout(new GridBagLayout());
@@ -83,14 +86,13 @@ public class Window extends JFrame{
         OPTIONS.add(button2);
         OPTIONS.add(button3);
 
+        MAIN_WINDOW.setLayout(null);
         initializeTree();
 
         //this.add(HUD, BorderLayout.NORTH);
         this.add(DESC, BorderLayout.SOUTH);
         this.add(OPTIONS, BorderLayout.EAST);
         this.add(MAIN_WINDOW, BorderLayout.CENTER);
-
-        this.pack();
 
         ImageIcon img = new ImageIcon("res/icon.png");
 
@@ -104,13 +106,25 @@ public class Window extends JFrame{
         CirclePanel root = new CirclePanel();
         root.setPreferredSize(new Dimension(64, 64));
         root.setBackground(Color.WHITE);
+
         root.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
+
         root.add(new JLabel("Root"), gbc);
         root.setComponentPopupMenu(new ContextMenu(new String[]{"Edit", "Delete"}));
 
         MAIN_WINDOW.add(root);
+
+        Insets insets = MAIN_WINDOW.getInsets();
+        Dimension size = root.getPreferredSize();
+
+        root.setBounds((MAIN_WINDOW.getWidth() - size.width) / 2 + insets.left, 24 + insets.top, size.width, size.height);
+        System.out.println(MAIN_WINDOW.getWidth());
+    }
+
+    private void resize(){
+        MAIN_WINDOW.setSize(new Dimension(this.getWidth() - 304,this.getHeight() - 64));
     }
 }
