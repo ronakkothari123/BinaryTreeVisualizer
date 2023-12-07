@@ -115,6 +115,8 @@ public class Window extends JFrame{
         root.add(new JLabel("Root"), gbc);
         root.setComponentPopupMenu(new ContextMenu(new String[]{"Edit", "Delete"}));
 
+        LinePanel line = new LinePanel(64, 64, 128, 128);
+
         MAIN_WINDOW.add(root);
 
         Insets insets = MAIN_WINDOW.getInsets();
