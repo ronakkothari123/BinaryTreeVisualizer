@@ -1,3 +1,4 @@
+import BinaryTree.*;
 import Components.CirclePanel;
 import Components.ContextMenu;
 
@@ -87,7 +88,8 @@ public class Window extends JFrame{
         OPTIONS.add(button3);
 
         MAIN_WINDOW.setLayout(null);
-        initializeTree();
+
+        renderTree(Main.tree, MAIN_WINDOW);
 
         //this.add(HUD, BorderLayout.NORTH);
         this.add(DESC, BorderLayout.SOUTH);
@@ -115,15 +117,95 @@ public class Window extends JFrame{
         root.add(new JLabel("Root"), gbc);
         root.setComponentPopupMenu(new ContextMenu(new String[]{"Edit", "Delete"}));
 
-        LinePanel line = new LinePanel(64, 64, 128, 128);
+        JPanel line = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.BLACK);
+                g.drawLine(0, 0, 128, 128);
+            }
+        };
+
+        line.setPreferredSize(new Dimension(128, 128));
+        line.setBackground(Color.BLUE);
 
         MAIN_WINDOW.add(root);
+        MAIN_WINDOW.add(line);
 
         Insets insets = MAIN_WINDOW.getInsets();
         Dimension size = root.getPreferredSize();
 
         root.setBounds((MAIN_WINDOW.getWidth() - size.width) / 2 + insets.left, 24 + insets.top, size.width, size.height);
-        System.out.println(MAIN_WINDOW.getWidth());
+    }
+
+    private static final int NODE_SIZE = 64; // Size of each node
+    private static final int VERTICAL_SPACING = 64; // Vertical spacing between levels
+    private static final int HORIZONTAL_SPACING = 30; // Horizontal spacing between nodes
+
+    public void renderTree(BinaryTree tree, JPanel mainPanel) {
+        if (tree.getRoot() == null) {
+            return;
+        }
+
+        int treeWidth = tree.getMaxWidth();
+        int level = 0;
+
+        // Use a recursive method to render each level
+        renderNode(tree.getRoot(), level, 0, treeWidth, mainPanel);
+    }
+
+    private void renderNode(BinaryTreeNode node, int level, int position, int width, JPanel panel) {
+        if (node == null) {
+            return;
+        }
+
+        // Calculate the horizontal position of the node
+        int x = position * (NODE_SIZE + HORIZONTAL_SPACING) + (width - NODE_SIZE) / 2 + panel.getWidth() / 2;
+        int y = level * (NODE_SIZE + VERTICAL_SPACING);
+
+        // Draw the node
+        CirclePanel nodePanel = createNodePanel(node.getValue());
+        nodePanel.setBounds(x, y, NODE_SIZE, NODE_SIZE);
+        panel.add(nodePanel);
+
+        // Draw lines to children if they exist
+        if (node.getLeft() != null) {
+            drawLine(panel, x, y, x - HORIZONTAL_SPACING, y + VERTICAL_SPACING);
+            renderNode(node.getLeft(), level + 1, position * 2, width / 2, panel);
+        }
+
+        if (node.getRight() != null) {
+            drawLine(panel, x, y, x + HORIZONTAL_SPACING, y + VERTICAL_SPACING);
+            renderNode(node.getRight(), level + 1, position * 2 + 1, width / 2, panel);
+        }
+    }
+
+    private CirclePanel createNodePanel(int value) {
+        CirclePanel nodePanel = new CirclePanel();
+        nodePanel.setPreferredSize(new Dimension(NODE_SIZE, NODE_SIZE));
+        nodePanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        nodePanel.add(new JLabel(String.valueOf(value)), gbc);
+        nodePanel.setBackground(Color.BLUE);
+        // Add context menu or other customizations here
+        return nodePanel;
+    }
+
+    private void drawLine(JPanel panel, int x1, int y1, int x2, int y2) {
+        JPanel linePanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.BLACK);
+                g.drawLine(x1, y1, x2, y2);
+            }
+        };
+        linePanel.setPreferredSize(new Dimension(Math.abs(x2 - x1), Math.abs(y2 - y1)));
+        linePanel.setBounds(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+        linePanel.setBackground(Color.RED);
+        panel.add(linePanel);
     }
 
     private void resize(){
