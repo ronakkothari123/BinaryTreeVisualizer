@@ -1,3 +1,4 @@
+import BinaryTree.*;
 import Components.CirclePanel;
 import Components.ContextMenu;
 
@@ -25,6 +26,7 @@ public class Window extends JFrame{
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setPreferredSize(new Dimension(1280, 720));
         this.setLayout(new BorderLayout());
+        this.pack();
 
         HUD = new JPanel();
         DESC = new JPanel();
@@ -37,7 +39,9 @@ public class Window extends JFrame{
         DESC.setBackground(new Color(17, 25, 38));
         OPTIONS.setPreferredSize(new Dimension(304,100));
         OPTIONS.setBackground(new Color(237, 242, 252));
-        MAIN_WINDOW.setPreferredSize(new Dimension(640,640));
+
+        resize();
+
         MAIN_WINDOW.setBackground(Color.WHITE);
 
         DESC.setLayout(new GridBagLayout());
@@ -83,14 +87,14 @@ public class Window extends JFrame{
         OPTIONS.add(button2);
         OPTIONS.add(button3);
 
-        initializeTree();
+        MAIN_WINDOW.setLayout(null);
+
+        renderTree(Main.tree, MAIN_WINDOW);
 
         //this.add(HUD, BorderLayout.NORTH);
         this.add(DESC, BorderLayout.SOUTH);
         this.add(OPTIONS, BorderLayout.EAST);
         this.add(MAIN_WINDOW, BorderLayout.CENTER);
-
-        this.pack();
 
         ImageIcon img = new ImageIcon("res/icon.png");
 
@@ -104,13 +108,107 @@ public class Window extends JFrame{
         CirclePanel root = new CirclePanel();
         root.setPreferredSize(new Dimension(64, 64));
         root.setBackground(Color.WHITE);
+
         root.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
+
         root.add(new JLabel("Root"), gbc);
         root.setComponentPopupMenu(new ContextMenu(new String[]{"Edit", "Delete"}));
 
+        JPanel line = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.BLACK);
+                g.drawLine(0, 0, 128, 128);
+            }
+        };
+
+        line.setPreferredSize(new Dimension(128, 128));
+        line.setBackground(Color.BLUE);
+
         MAIN_WINDOW.add(root);
+        MAIN_WINDOW.add(line);
+
+        Insets insets = MAIN_WINDOW.getInsets();
+        Dimension size = root.getPreferredSize();
+
+        root.setBounds((MAIN_WINDOW.getWidth() - size.width) / 2 + insets.left, 24 + insets.top, size.width, size.height);
+    }
+
+    private static final int NODE_SIZE = 64; // Size of each node
+    private static final int VERTICAL_SPACING = 64; // Vertical spacing between levels
+    private static final int HORIZONTAL_SPACING = 30; // Horizontal spacing between nodes
+
+    public void renderTree(BinaryTree tree, JPanel mainPanel) {
+        if (tree.getRoot() == null) {
+            return;
+        }
+
+        int treeWidth = tree.getMaxWidth();
+        int level = 0;
+
+        // Use a recursive method to render each level
+        renderNode(tree.getRoot(), level, 0, treeWidth, mainPanel);
+    }
+
+    private void renderNode(BinaryTreeNode node, int level, int position, int width, JPanel panel) {
+        if (node == null) {
+            return;
+        }
+
+        // Calculate the horizontal position of the node
+        int x = position * (NODE_SIZE + HORIZONTAL_SPACING) + (width - NODE_SIZE) / 2 + panel.getWidth() / 2;
+        int y = level * (NODE_SIZE + VERTICAL_SPACING);
+
+        // Draw the node
+        CirclePanel nodePanel = createNodePanel(node.getValue());
+        nodePanel.setBounds(x, y, NODE_SIZE, NODE_SIZE);
+        panel.add(nodePanel);
+
+        // Draw lines to children if they exist
+        if (node.getLeft() != null) {
+            drawLine(panel, x, y, x - HORIZONTAL_SPACING, y + VERTICAL_SPACING);
+            renderNode(node.getLeft(), level + 1, position * 2, width / 2, panel);
+        }
+
+        if (node.getRight() != null) {
+            drawLine(panel, x, y, x + HORIZONTAL_SPACING, y + VERTICAL_SPACING);
+            renderNode(node.getRight(), level + 1, position * 2 + 1, width / 2, panel);
+        }
+    }
+
+    private CirclePanel createNodePanel(int value) {
+        CirclePanel nodePanel = new CirclePanel();
+        nodePanel.setPreferredSize(new Dimension(NODE_SIZE, NODE_SIZE));
+        nodePanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        nodePanel.add(new JLabel(String.valueOf(value)), gbc);
+        nodePanel.setBackground(Color.BLUE);
+        // Add context menu or other customizations here
+        return nodePanel;
+    }
+
+    private void drawLine(JPanel panel, int x1, int y1, int x2, int y2) {
+        JPanel linePanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.BLACK);
+                g.drawLine(x1, y1, x2, y2);
+            }
+        };
+        linePanel.setPreferredSize(new Dimension(Math.abs(x2 - x1), Math.abs(y2 - y1)));
+        linePanel.setBounds(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+        linePanel.setBackground(Color.RED);
+        panel.add(linePanel);
+    }
+
+    private void resize(){
+        MAIN_WINDOW.setSize(new Dimension(this.getWidth() - 304,this.getHeight() - 64));
     }
 }

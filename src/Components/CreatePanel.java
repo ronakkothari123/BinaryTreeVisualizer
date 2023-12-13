@@ -3,8 +3,7 @@ package Components;
 import javax.swing.*;
 import java.awt.*;
 
-public class CirclePanel extends JPanel {
-    @Override
+public class CreatePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         //Adding  super.paintComponent....
         super.paintComponent(g);
