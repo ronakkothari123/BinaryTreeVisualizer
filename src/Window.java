@@ -84,6 +84,15 @@ public class Window extends JFrame{
         //setup OPTIONS tab
 
         JButton button1 = new JButton("BST Sort");
+
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main.tree.reconstructAsBST();
+                updateTree();
+            }
+        });
+
         JButton button2 = new JButton("Undo");
         JButton button3 = new JButton("Clear All");
 
