@@ -1,10 +1,13 @@
 package BinaryTree;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Stack;
 
 public class BinaryTree {
     private BinaryTreeNode root;
+    public static Stack<Integer> treeOrder = new Stack<>();
 
     public BinaryTree() {
         root = null;
@@ -12,38 +15,60 @@ public class BinaryTree {
 
     public BinaryTree(BinaryTreeNode root) {
         this.root = root;
+        treeOrder.add(root.getValue());
     }
 
     public void setRoot(BinaryTreeNode root) {
         this.root = root;
+        treeOrder.add(root.getValue());
     }
 
     public BinaryTreeNode getRoot() {
         return root;
     }
 
-    public int getMaxWidth() {
-        if (root == null) {
-            return 0;
+    public ArrayList<Integer> preorder() {
+        ArrayList<Integer> result = new ArrayList<>();
+        preorderTraversal(root, result);
+        return result;
+    }
+
+    private void preorderTraversal(BinaryTreeNode node, ArrayList<Integer> result) {
+        if (node == null) {
+            return;
         }
+        result.add(node.getValue());
+        preorderTraversal(node.getLeft(), result);
+        preorderTraversal(node.getRight(), result);
+    }
 
-        Queue<BinaryTreeNode> queue = new LinkedList<>();
-        queue.add(root);
-        int maxWidth = 0;
+    public ArrayList<Integer> inorder() {
+        ArrayList<Integer> result = new ArrayList<>();
+        inorderTraversal(root, result);
+        return result;
+    }
 
-        while (!queue.isEmpty()) {
-            int count = queue.size();
-            maxWidth = Math.max(maxWidth, count);
+    private void inorderTraversal(BinaryTreeNode node, ArrayList<Integer> result) {
+        if (node == null) {
+            return;
+        }
+        inorderTraversal(node.getLeft(), result);
+        result.add(node.getValue());
+        inorderTraversal(node.getRight(), result);
+    }
 
-            while (count-- > 0) {
-                BinaryTreeNode node = queue.poll();
-                if (node.getLeft() != null) {
-                    queue.add(node.getLeft());
-                }
-                if (node.getRight() != null) {
-                    queue.add(node.getRight());
-                }
-            }
-        } return maxWidth;
+    public ArrayList<Integer> postorder() {
+        ArrayList<Integer> result = new ArrayList<>();
+        postorderTraversal(root, result);
+        return result;
+    }
+
+    private void postorderTraversal(BinaryTreeNode node, ArrayList<Integer> result) {
+        if (node == null) {
+            return;
+        }
+        postorderTraversal(node.getLeft(), result);
+        postorderTraversal(node.getRight(), result);
+        result.add(node.getValue());
     }
 }

@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4511db66-bead-4216-b685-66e0c3c0d615" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/BinaryTree/BinaryTree.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/BinaryTree/BinaryTreeNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Components/CirclePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/CirclePanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Components/CreatePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/CreatePanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Components/LinePanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BinaryTree/BinaryTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BinaryTree/BinaryTree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BinaryTree/BinaryTreeNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BinaryTree/BinaryTreeNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Window.java" afterDir="false" />
     </list>
@@ -47,9 +43,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.Main.executor": "Run",
+    "Downloaded.Files.Path.Enabled": "false",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "dev",
+    "git-widget-placeholder": "development",
+    "java.suggest.annotation.dependency": "false",
     "jdk.selected.JAVA_MODULE": "17",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
@@ -112,6 +113,7 @@
       <workItem from="1701973910598" duration="279000" />
       <workItem from="1701974203113" duration="60000" />
       <workItem from="1702007354607" duration="5355000" />
+      <workItem from="1702526605532" duration="6529000" />
     </task>
     <servers />
   </component>
