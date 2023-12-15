@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class Window extends JFrame{
@@ -89,7 +90,7 @@ public class Window extends JFrame{
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Main.tree.reconstructAsBST();
+                Main.tree.createBinarySearchTree();
                 updateTree(true);
             }
         });
@@ -122,6 +123,7 @@ public class Window extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 Main.tree = new BinaryTree();
+                BinaryTree.treeOrder = new LinkedList<>();
                 updateTree(true);
             }
         });

@@ -71,36 +71,39 @@ public class BinaryTree {
         result.add(node.getValue());
     }
 
-    public void reconstructAsBST() {
-        if (treeOrder.isEmpty()) {
-            root = null;
-            return;
-        }
+    public void createBinarySearchTree() {
+        root = null; // Resetting the root
 
         Queue<Integer> tempQueue = new LinkedList<>();
 
         while(!treeOrder.isEmpty()) tempQueue.add(treeOrder.poll());
 
-        root = new BinaryTreeNode(tempQueue.poll()); // Set the first element as root
-
         while (!tempQueue.isEmpty()) {
-            insertIntoBST(root, tempQueue.poll());
+            insertIntoBST(tempQueue.poll());
         }
     }
 
-    private void insertIntoBST(BinaryTreeNode node, int value) {
-        if (value < node.getValue()) {
-            if (node.getLeft() == null) {
-                node.setLeft(new BinaryTreeNode(value));
-            } else {
-                insertIntoBST(node.getLeft(), value);
-            }
-        } else {
-            if (node.getRight() == null) {
-                node.setRight(new BinaryTreeNode(value));
-            } else {
-                insertIntoBST(node.getRight(), value);
-            }
+    /**
+     * Helper method to insert a value into the binary search tree.
+     */
+    private void insertIntoBST(int value) {
+        root = insertRecursive(root, value);
+    }
+
+    /**
+     * Recursive method to insert a value into the binary search tree.
+     */
+    private BinaryTreeNode insertRecursive(BinaryTreeNode node, int value) {
+        if (node == null) {
+            return new BinaryTreeNode(value);
         }
+
+        if (value < node.getValue()) {
+            node.setLeft(insertRecursive(node.getLeft(), value));
+        } else if (value > node.getValue()) {
+            node.setRight(insertRecursive(node.getRight(), value));
+        }
+
+        return node;
     }
 }
