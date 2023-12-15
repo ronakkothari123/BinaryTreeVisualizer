@@ -31,6 +31,7 @@ public class Window extends JFrame{
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setPreferredSize(new Dimension(1280, 720));
         this.setMinimumSize(new Dimension(1280, 720));
+        this.setLocationRelativeTo(null);
         this.setLayout(new BorderLayout());
         this.pack();
 
@@ -89,18 +90,39 @@ public class Window extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 Main.tree.reconstructAsBST();
-                updateTree();
+                updateTree(true);
             }
         });
 
         JButton button2 = new JButton("Undo");
+
+        button2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(Main.history.isEmpty() || Main.history.size() == 1){
+                    Main.tree = new BinaryTree();
+                    updateTree(true);
+                    return;
+                }
+
+                Main.history.remove(Main.history.size() - 1);
+                Main.tree = Main.history.get(Main.history.size() - 1);
+
+                for(int i = 0; i < Main.history.size(); i++){
+                    System.out.println(Main.history.get(i).inorder());
+                }
+
+                updateTree(false);
+            }
+        });
+
         JButton button3 = new JButton("Clear All");
 
         button3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Main.tree = new BinaryTree();
-                updateTree();
+                updateTree(true);
             }
         });
 
@@ -112,12 +134,16 @@ public class Window extends JFrame{
 
         MAIN_WINDOW.setLayout(null);
 
-        updateTree();
+        updateTree(true);
 
         //this.add(HUD, BorderLayout.NORTH);
         this.add(DESC, BorderLayout.SOUTH);
         this.add(OPTIONS, BorderLayout.EAST);
-        this.add(MAIN_WINDOW, BorderLayout.CENTER);
+
+        JScrollPane scrollPane = new JScrollPane(MAIN_WINDOW);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        this.getContentPane().add(scrollPane, BorderLayout.CENTER);
 
         ImageIcon img = new ImageIcon("res/icon.png");
 
@@ -127,12 +153,22 @@ public class Window extends JFrame{
         this.setVisible(true);
     }
 
-    public void updateTree(){
+    public void updateTree(boolean addToHistory){
+        if(Main.tree.getRoot() == null){
+            preorder.setText("PreOrder: N/A");
+            inorder.setText("InOrder: N/A");
+            postorder.setText("PostOrder: N/A");
+
+            renderTree(Main.tree, MAIN_WINDOW, addToHistory);
+
+            return;
+        }
+
         preorder.setText(convertListToText(Main.tree.preorder(), "PreOrder: "));
         inorder.setText(convertListToText(Main.tree.inorder(), "InOrder: "));
         postorder.setText(convertListToText(Main.tree.postorder(), "PostOrder: "));
 
-        renderTree(Main.tree, MAIN_WINDOW);
+        renderTree(Main.tree, MAIN_WINDOW, addToHistory);
     }
 
     private String convertListToText(ArrayList<Integer> list, String prefix){
@@ -147,10 +183,12 @@ public class Window extends JFrame{
     private static final int VERTICAL_SPACING = 64; // Vertical spacing between levels
     private static final int HORIZONTAL_SPACING = 30; // Horizontal spacing between nodes
 
-    private void renderTree(BinaryTree tree, JPanel panel) {
+    private void renderTree(BinaryTree tree, JPanel panel, boolean addToHistory) {
         panel.removeAll();
         Map<BinaryTreeNode, Point> nodePositions = new HashMap<>();
         calculatePositions(tree.getRoot(), 0, 0, 0, nodePositions);
+
+        if(addToHistory && tree.getRoot() != null) Main.history.add(new BinaryTree(tree.getRoot().clone()));
 
         for (Map.Entry<BinaryTreeNode, Point> entry : nodePositions.entrySet()) {
             BinaryTreeNode node = entry.getKey();
@@ -164,7 +202,7 @@ public class Window extends JFrame{
             if (node.getLeft() != null) {
                 Point leftChildPoint = nodePositions.get(node.getLeft());
                 drawLine(panel, p.x + NODE_SIZE / 2, p.y + NODE_SIZE, leftChildPoint.x + NODE_SIZE / 2, leftChildPoint.y);
-            } else if (node.getLeft() == null && node.getRight() == null) { // Leaf node
+            } else { // Leaf node
                 int leftPanelX = Math.max(p.x - NODE_SIZE, 0); // Adjust position to avoid going off-screen
                 JPanel addLeftPanel = createAddNodePanel(node, true, panel);
                 addLeftPanel.setBounds(leftPanelX, p.y + NODE_SIZE, NODE_SIZE, NODE_SIZE);
@@ -175,11 +213,18 @@ public class Window extends JFrame{
             if (node.getRight() != null) {
                 Point rightChildPoint = nodePositions.get(node.getRight());
                 drawLine(panel, p.x + NODE_SIZE / 2, p.y + NODE_SIZE, rightChildPoint.x + NODE_SIZE / 2, rightChildPoint.y);
-            } else if (node.getLeft() == null && node.getRight() == null) { // Leaf node
+            } else { // Leaf node
                 JPanel addRightPanel = createAddNodePanel(node, false, panel);
                 addRightPanel.setBounds(p.x + NODE_SIZE, p.y + NODE_SIZE, NODE_SIZE, NODE_SIZE);
                 panel.add(addRightPanel);
             }
+        }
+
+        if(tree.getRoot() == null){
+            int leftPanelX = Math.max(NODE_SIZE, 0); // Adjust position to avoid going off-screen
+            JPanel addLeftPanel = createAddNodePanel(null, true, panel);
+            addLeftPanel.setBounds(leftPanelX, NODE_SIZE, NODE_SIZE, NODE_SIZE);
+            panel.add(addLeftPanel);
         }
 
         panel.revalidate();
@@ -196,13 +241,17 @@ public class Window extends JFrame{
                 int value = Integer.parseInt(textField.getText());
                 BinaryTreeNode newNode = new BinaryTreeNode(value);
 
-                if (isLeftChild) {
-                    parent.setLeft(newNode);
+                if(parent == null){
+                    Main.tree.setRoot(newNode);
                 } else {
-                    parent.setRight(newNode);
+                    if (isLeftChild) {
+                        parent.setLeft(newNode);
+                    } else {
+                        parent.setRight(newNode);
+                    }
                 }
 
-                renderTree(Main.tree, panel); // Assuming Main.tree is accessible and updatable
+                updateTree(true); // Assuming Main.tree is accessible and updatable
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(panel, "Invalid input. Please enter a number.");
             }
@@ -211,6 +260,8 @@ public class Window extends JFrame{
         addNodePanel.add(textField, BorderLayout.CENTER);
         addNodePanel.add(addButton, BorderLayout.EAST);
         addNodePanel.setOpaque(false);
+
+        addNodePanel.setLayout(new BoxLayout(addNodePanel, BoxLayout.Y_AXIS));
 
         return addNodePanel;
     }

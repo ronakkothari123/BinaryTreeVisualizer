@@ -44,4 +44,17 @@ public class BinaryTreeNode {
         int rightLeaves = (this.right == null) ? 0 : this.right.countLeaves();
         return leftLeaves + rightLeaves;
     }
+
+    public BinaryTreeNode clone() {
+        BinaryTreeNode newNode = new BinaryTreeNode(this.value);
+
+        if (this.left != null) {
+            newNode.left = this.left.clone();
+        }
+        if (this.right != null) {
+            newNode.right = this.right.clone();
+        }
+
+        return newNode;
+    }
 }
