@@ -7,6 +7,8 @@
     <list default="true" id="4511db66-bead-4216-b685-66e0c3c0d615" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BinaryTree/BinaryTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BinaryTree/BinaryTree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BinaryTree/BinaryTreeNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BinaryTree/BinaryTreeNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Components/CirclePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/CirclePanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Window.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -113,7 +115,7 @@
       <workItem from="1702007354607" duration="5355000" />
       <workItem from="1702526605532" duration="7761000" />
       <workItem from="1702590190101" duration="652000" />
-      <workItem from="1702613013603" duration="6405000" />
+      <workItem from="1702613013603" duration="6528000" />
     </task>
     <servers />
   </component>

@@ -37,14 +37,6 @@ public class BinaryTreeNode {
         BinaryTree.treeOrder.add(right.getValue());
     }
 
-    public int countLeaves() {
-        if (this.left == null && this.right == null) return 1;
-
-        int leftLeaves = (this.left == null) ? 0 : this.left.countLeaves();
-        int rightLeaves = (this.right == null) ? 0 : this.right.countLeaves();
-        return leftLeaves + rightLeaves;
-    }
-
     public BinaryTreeNode clone() {
         BinaryTreeNode newNode = new BinaryTreeNode(this.value);
 

@@ -200,22 +200,20 @@ public class Window extends JFrame{
             circle.setBounds(p.x, p.y, NODE_SIZE, NODE_SIZE);
             panel.add(circle);
 
-            // Check for left child
             if (node.getLeft() != null) {
                 Point leftChildPoint = nodePositions.get(node.getLeft());
                 drawLine(panel, p.x + NODE_SIZE / 2, p.y + NODE_SIZE, leftChildPoint.x + NODE_SIZE / 2, leftChildPoint.y);
-            } else { // Leaf node
-                int leftPanelX = Math.max(p.x - NODE_SIZE, 0); // Adjust position to avoid going off-screen
+            } else {
+                int leftPanelX = Math.max(p.x - NODE_SIZE, 0);
                 JPanel addLeftPanel = createAddNodePanel(node, true, panel);
                 addLeftPanel.setBounds(leftPanelX, p.y + NODE_SIZE, NODE_SIZE, NODE_SIZE);
                 panel.add(addLeftPanel);
             }
 
-            // Check for right child
             if (node.getRight() != null) {
                 Point rightChildPoint = nodePositions.get(node.getRight());
                 drawLine(panel, p.x + NODE_SIZE / 2, p.y + NODE_SIZE, rightChildPoint.x + NODE_SIZE / 2, rightChildPoint.y);
-            } else { // Leaf node
+            } else {
                 JPanel addRightPanel = createAddNodePanel(node, false, panel);
                 addRightPanel.setBounds(p.x + NODE_SIZE, p.y + NODE_SIZE, NODE_SIZE, NODE_SIZE);
                 panel.add(addRightPanel);
@@ -223,7 +221,7 @@ public class Window extends JFrame{
         }
 
         if(tree.getRoot() == null){
-            int leftPanelX = Math.max(NODE_SIZE, 0); // Adjust position to avoid going off-screen
+            int leftPanelX = Math.max(NODE_SIZE, 0);
             JPanel addLeftPanel = createAddNodePanel(null, true, panel);
             addLeftPanel.setBounds(leftPanelX, NODE_SIZE, NODE_SIZE, NODE_SIZE);
             panel.add(addLeftPanel);
@@ -253,7 +251,7 @@ public class Window extends JFrame{
                     }
                 }
 
-                updateTree(true); // Assuming Main.tree is accessible and updatable
+                updateTree(true);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(panel, "Invalid input. Please enter a number.");
             }
