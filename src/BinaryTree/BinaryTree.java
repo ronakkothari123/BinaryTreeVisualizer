@@ -1,10 +1,12 @@
 package BinaryTree;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class BinaryTree {
     private BinaryTreeNode root;
+    public static Queue<Integer> treeOrder = new LinkedList<>();
 
     public BinaryTree() {
         root = null;
@@ -12,38 +14,96 @@ public class BinaryTree {
 
     public BinaryTree(BinaryTreeNode root) {
         this.root = root;
+        treeOrder.add(root.getValue());
     }
 
     public void setRoot(BinaryTreeNode root) {
         this.root = root;
+        treeOrder.add(root.getValue());
     }
 
     public BinaryTreeNode getRoot() {
         return root;
     }
 
-    public int getMaxWidth() {
-        if (root == null) {
-            return 0;
+    public ArrayList<Integer> preorder() {
+        ArrayList<Integer> result = new ArrayList<>();
+        preorderTraversal(root, result);
+        return result;
+    }
+
+    private void preorderTraversal(BinaryTreeNode node, ArrayList<Integer> result) {
+        if (node == null) {
+            return;
+        }
+        result.add(node.getValue());
+        preorderTraversal(node.getLeft(), result);
+        preorderTraversal(node.getRight(), result);
+    }
+
+    public ArrayList<Integer> inorder() {
+        ArrayList<Integer> result = new ArrayList<>();
+        inorderTraversal(root, result);
+        return result;
+    }
+
+    private void inorderTraversal(BinaryTreeNode node, ArrayList<Integer> result) {
+        if (node == null) {
+            return;
+        }
+        inorderTraversal(node.getLeft(), result);
+        result.add(node.getValue());
+        inorderTraversal(node.getRight(), result);
+    }
+
+    public ArrayList<Integer> postorder() {
+        ArrayList<Integer> result = new ArrayList<>();
+        postorderTraversal(root, result);
+        return result;
+    }
+
+    private void postorderTraversal(BinaryTreeNode node, ArrayList<Integer> result) {
+        if (node == null) {
+            return;
+        }
+        postorderTraversal(node.getLeft(), result);
+        postorderTraversal(node.getRight(), result);
+        result.add(node.getValue());
+    }
+
+    public void createBinarySearchTree() {
+        root = null; // Resetting the root
+
+        Queue<Integer> tempQueue = new LinkedList<>();
+
+        while(!treeOrder.isEmpty()) tempQueue.add(treeOrder.poll());
+
+        while (!tempQueue.isEmpty()) {
+            insertIntoBST(tempQueue.poll());
+        }
+    }
+
+    /**
+     * Helper method to insert a value into the binary search tree.
+     */
+    private void insertIntoBST(int value) {
+        root = insertRecursive(root, value);
+    }
+
+    /**
+     * Recursive method to insert a value into the binary search tree.
+     */
+    private BinaryTreeNode insertRecursive(BinaryTreeNode node, int value) {
+        if (node == null) {
+            return new BinaryTreeNode(value);
         }
 
-        Queue<BinaryTreeNode> queue = new LinkedList<>();
-        queue.add(root);
-        int maxWidth = 0;
+        if (value < node.getValue()) {
+            node.setLeft(insertRecursive(node.getLeft(), value));
+        } else if (value > node.getValue()) {
+            node.setRight(insertRecursive(node.getRight(), value));
+        }
 
-        while (!queue.isEmpty()) {
-            int count = queue.size();
-            maxWidth = Math.max(maxWidth, count);
-
-            while (count-- > 0) {
-                BinaryTreeNode node = queue.poll();
-                if (node.getLeft() != null) {
-                    queue.add(node.getLeft());
-                }
-                if (node.getRight() != null) {
-                    queue.add(node.getRight());
-                }
-            }
-        } return maxWidth;
+        return node;
     }
 }

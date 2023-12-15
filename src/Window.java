@@ -5,9 +5,15 @@ import Components.ContextMenu;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class Window extends JFrame{
 
@@ -25,6 +31,8 @@ public class Window extends JFrame{
     public Window(){
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setPreferredSize(new Dimension(1280, 720));
+        this.setMinimumSize(new Dimension(1280, 720));
+        this.setLocationRelativeTo(null);
         this.setLayout(new BorderLayout());
         this.pack();
 
@@ -78,8 +86,47 @@ public class Window extends JFrame{
         //setup OPTIONS tab
 
         JButton button1 = new JButton("BST Sort");
+
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main.tree.createBinarySearchTree();
+                updateTree(true);
+            }
+        });
+
         JButton button2 = new JButton("Undo");
+
+        button2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(Main.history.isEmpty() || Main.history.size() == 1){
+                    Main.tree = new BinaryTree();
+                    updateTree(true);
+                    return;
+                }
+
+                Main.history.remove(Main.history.size() - 1);
+                Main.tree = Main.history.get(Main.history.size() - 1);
+
+                for(int i = 0; i < Main.history.size(); i++){
+                    System.out.println(Main.history.get(i).inorder());
+                }
+
+                updateTree(false);
+            }
+        });
+
         JButton button3 = new JButton("Clear All");
+
+        button3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main.tree = new BinaryTree();
+                BinaryTree.treeOrder = new LinkedList<>();
+                updateTree(true);
+            }
+        });
 
         OPTIONS.setLayout(new BoxLayout(OPTIONS, BoxLayout.Y_AXIS));
 
@@ -89,12 +136,16 @@ public class Window extends JFrame{
 
         MAIN_WINDOW.setLayout(null);
 
-        renderTree(Main.tree, MAIN_WINDOW);
+        updateTree(true);
 
         //this.add(HUD, BorderLayout.NORTH);
         this.add(DESC, BorderLayout.SOUTH);
         this.add(OPTIONS, BorderLayout.EAST);
-        this.add(MAIN_WINDOW, BorderLayout.CENTER);
+
+        JScrollPane scrollPane = new JScrollPane(MAIN_WINDOW);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        this.getContentPane().add(scrollPane, BorderLayout.CENTER);
 
         ImageIcon img = new ImageIcon("res/icon.png");
 
@@ -104,93 +155,126 @@ public class Window extends JFrame{
         this.setVisible(true);
     }
 
-    private void initializeTree(){
-        CirclePanel root = new CirclePanel();
-        root.setPreferredSize(new Dimension(64, 64));
-        root.setBackground(Color.WHITE);
+    public void updateTree(boolean addToHistory){
+        if(Main.tree.getRoot() == null){
+            preorder.setText("PreOrder: N/A");
+            inorder.setText("InOrder: N/A");
+            postorder.setText("PostOrder: N/A");
 
-        root.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+            renderTree(Main.tree, MAIN_WINDOW, addToHistory);
 
-        root.add(new JLabel("Root"), gbc);
-        root.setComponentPopupMenu(new ContextMenu(new String[]{"Edit", "Delete"}));
+            return;
+        }
 
-        JPanel line = new JPanel(){
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.setColor(Color.BLACK);
-                g.drawLine(0, 0, 128, 128);
-            }
-        };
+        preorder.setText(convertListToText(Main.tree.preorder(), "PreOrder: "));
+        inorder.setText(convertListToText(Main.tree.inorder(), "InOrder: "));
+        postorder.setText(convertListToText(Main.tree.postorder(), "PostOrder: "));
 
-        line.setPreferredSize(new Dimension(128, 128));
-        line.setBackground(Color.BLUE);
+        renderTree(Main.tree, MAIN_WINDOW, addToHistory);
+    }
 
-        MAIN_WINDOW.add(root);
-        MAIN_WINDOW.add(line);
+    private String convertListToText(ArrayList<Integer> list, String prefix){
+        String returnVal = prefix + list.get(0).toString();
 
-        Insets insets = MAIN_WINDOW.getInsets();
-        Dimension size = root.getPreferredSize();
+        for(int i = 1; i < list.size(); i++) returnVal += ", " + list.get(i).toString();
 
-        root.setBounds((MAIN_WINDOW.getWidth() - size.width) / 2 + insets.left, 24 + insets.top, size.width, size.height);
+        return returnVal;
     }
 
     private static final int NODE_SIZE = 64; // Size of each node
     private static final int VERTICAL_SPACING = 64; // Vertical spacing between levels
     private static final int HORIZONTAL_SPACING = 30; // Horizontal spacing between nodes
 
-    public void renderTree(BinaryTree tree, JPanel mainPanel) {
-        if (tree.getRoot() == null) {
-            return;
+    private void renderTree(BinaryTree tree, JPanel panel, boolean addToHistory) {
+        panel.removeAll();
+        Map<BinaryTreeNode, Point> nodePositions = new HashMap<>();
+        calculatePositions(tree.getRoot(), 0, 0, 0, nodePositions);
+
+        if(addToHistory && tree.getRoot() != null) Main.history.add(new BinaryTree(tree.getRoot().clone()));
+
+        for (Map.Entry<BinaryTreeNode, Point> entry : nodePositions.entrySet()) {
+            BinaryTreeNode node = entry.getKey();
+            Point p = entry.getValue();
+
+            CirclePanel circle = createNodeCircle(node.getValue());
+            circle.setBounds(p.x, p.y, NODE_SIZE, NODE_SIZE);
+            panel.add(circle);
+
+            // Check for left child
+            if (node.getLeft() != null) {
+                Point leftChildPoint = nodePositions.get(node.getLeft());
+                drawLine(panel, p.x + NODE_SIZE / 2, p.y + NODE_SIZE, leftChildPoint.x + NODE_SIZE / 2, leftChildPoint.y);
+            } else { // Leaf node
+                int leftPanelX = Math.max(p.x - NODE_SIZE, 0); // Adjust position to avoid going off-screen
+                JPanel addLeftPanel = createAddNodePanel(node, true, panel);
+                addLeftPanel.setBounds(leftPanelX, p.y + NODE_SIZE, NODE_SIZE, NODE_SIZE);
+                panel.add(addLeftPanel);
+            }
+
+            // Check for right child
+            if (node.getRight() != null) {
+                Point rightChildPoint = nodePositions.get(node.getRight());
+                drawLine(panel, p.x + NODE_SIZE / 2, p.y + NODE_SIZE, rightChildPoint.x + NODE_SIZE / 2, rightChildPoint.y);
+            } else { // Leaf node
+                JPanel addRightPanel = createAddNodePanel(node, false, panel);
+                addRightPanel.setBounds(p.x + NODE_SIZE, p.y + NODE_SIZE, NODE_SIZE, NODE_SIZE);
+                panel.add(addRightPanel);
+            }
         }
 
-        int treeWidth = tree.getMaxWidth();
-        int level = 0;
+        if(tree.getRoot() == null){
+            int leftPanelX = Math.max(NODE_SIZE, 0); // Adjust position to avoid going off-screen
+            JPanel addLeftPanel = createAddNodePanel(null, true, panel);
+            addLeftPanel.setBounds(leftPanelX, NODE_SIZE, NODE_SIZE, NODE_SIZE);
+            panel.add(addLeftPanel);
+        }
 
-        // Use a recursive method to render each level
-        renderNode(tree.getRoot(), level, 0, treeWidth, mainPanel);
+        panel.revalidate();
+        panel.repaint();
     }
 
-    private void renderNode(BinaryTreeNode node, int level, int position, int width, JPanel panel) {
-        if (node == null) {
-            return;
-        }
+    private JPanel createAddNodePanel(BinaryTreeNode parent, boolean isLeftChild, JPanel panel) {
+        JPanel addNodePanel = new JPanel(new BorderLayout());
+        JTextField textField = new JTextField();
+        JButton addButton = new JButton("Add");
 
-        // Calculate the horizontal position of the node
-        int x = position * (NODE_SIZE + HORIZONTAL_SPACING) + (width - NODE_SIZE) / 2 + panel.getWidth() / 2;
-        int y = level * (NODE_SIZE + VERTICAL_SPACING);
+        addButton.addActionListener(e -> {
+            try {
+                int value = Integer.parseInt(textField.getText());
+                BinaryTreeNode newNode = new BinaryTreeNode(value);
 
-        // Draw the node
-        CirclePanel nodePanel = createNodePanel(node.getValue());
-        nodePanel.setBounds(x, y, NODE_SIZE, NODE_SIZE);
-        panel.add(nodePanel);
+                if(parent == null){
+                    Main.tree.setRoot(newNode);
+                } else {
+                    if (isLeftChild) {
+                        parent.setLeft(newNode);
+                    } else {
+                        parent.setRight(newNode);
+                    }
+                }
 
-        // Draw lines to children if they exist
-        if (node.getLeft() != null) {
-            drawLine(panel, x, y, x - HORIZONTAL_SPACING, y + VERTICAL_SPACING);
-            renderNode(node.getLeft(), level + 1, position * 2, width / 2, panel);
-        }
+                updateTree(true); // Assuming Main.tree is accessible and updatable
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(panel, "Invalid input. Please enter a number.");
+            }
+        });
 
-        if (node.getRight() != null) {
-            drawLine(panel, x, y, x + HORIZONTAL_SPACING, y + VERTICAL_SPACING);
-            renderNode(node.getRight(), level + 1, position * 2 + 1, width / 2, panel);
-        }
+        addNodePanel.add(textField, BorderLayout.CENTER);
+        addNodePanel.add(addButton, BorderLayout.EAST);
+        addNodePanel.setOpaque(false);
+
+        addNodePanel.setLayout(new BoxLayout(addNodePanel, BoxLayout.Y_AXIS));
+
+        return addNodePanel;
     }
 
-    private CirclePanel createNodePanel(int value) {
-        CirclePanel nodePanel = new CirclePanel();
-        nodePanel.setPreferredSize(new Dimension(NODE_SIZE, NODE_SIZE));
-        nodePanel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        nodePanel.add(new JLabel(String.valueOf(value)), gbc);
-        nodePanel.setBackground(Color.BLUE);
-        // Add context menu or other customizations here
-        return nodePanel;
+    private CirclePanel createNodeCircle(int value) {
+        CirclePanel circle = new CirclePanel();
+        circle.setPreferredSize(new Dimension(NODE_SIZE, NODE_SIZE));
+        circle.setLayout(new GridBagLayout());
+        circle.add(new JLabel(String.valueOf(value)), new GridBagConstraints());
+        circle.setOpaque(false);
+        return circle;
     }
 
     private void drawLine(JPanel panel, int x1, int y1, int x2, int y2) {
@@ -199,13 +283,45 @@ public class Window extends JFrame{
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 g.setColor(Color.BLACK);
-                g.drawLine(x1, y1, x2, y2);
+
+                // Determine start and end points for the line within the panel
+                int startX = (x1 < x2) ? 0 : this.getWidth();
+                int startY = 0;
+                int endX = (x1 < x2) ? this.getWidth() : 0;
+                int endY = this.getHeight();
+
+                g.drawLine(startX, startY, endX, endY);
             }
         };
-        linePanel.setPreferredSize(new Dimension(Math.abs(x2 - x1), Math.abs(y2 - y1)));
-        linePanel.setBounds(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
-        linePanel.setBackground(Color.RED);
+
+        int lineX = Math.min(x1, x2);
+        int lineY = Math.min(y1, y2);
+        int lineWidth = Math.abs(x1 - x2);
+        int lineHeight = Math.abs(y1 - y2);
+
+        linePanel.setOpaque(false);
+        linePanel.setBounds(lineX, lineY, lineWidth, lineHeight);
         panel.add(linePanel);
+    }
+
+    private void calculatePositions(BinaryTreeNode node, int depth, int x, int position, Map<BinaryTreeNode, Point> nodePositions) {
+        if (node == null) {
+            return;
+        }
+
+        int leftWidth = getWidth(node.getLeft());
+        int rightWidth = getWidth(node.getRight());
+
+        int currentX = x + leftWidth * (NODE_SIZE + HORIZONTAL_SPACING);
+        nodePositions.put(node, new Point(currentX, depth * (NODE_SIZE + VERTICAL_SPACING)));
+
+        calculatePositions(node.getLeft(), depth + 1, x, position * 2, nodePositions);
+        calculatePositions(node.getRight(), depth + 1, currentX + NODE_SIZE + HORIZONTAL_SPACING, position * 2 + 1, nodePositions);
+    }
+
+    private int getWidth(BinaryTreeNode node) {
+        if (node == null) return 0;
+        return getWidth(node.getLeft()) + 1 + getWidth(node.getRight());
     }
 
     private void resize(){

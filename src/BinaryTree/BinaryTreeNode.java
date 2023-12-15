@@ -25,6 +25,7 @@ public class BinaryTreeNode {
 
     public void setLeft(BinaryTreeNode left) {
         this.left = left;
+        BinaryTree.treeOrder.add(left.getValue());
     }
 
     public BinaryTreeNode getRight() {
@@ -33,5 +34,27 @@ public class BinaryTreeNode {
 
     public void setRight(BinaryTreeNode right) {
         this.right = right;
+        BinaryTree.treeOrder.add(right.getValue());
+    }
+
+    public int countLeaves() {
+        if (this.left == null && this.right == null) return 1;
+
+        int leftLeaves = (this.left == null) ? 0 : this.left.countLeaves();
+        int rightLeaves = (this.right == null) ? 0 : this.right.countLeaves();
+        return leftLeaves + rightLeaves;
+    }
+
+    public BinaryTreeNode clone() {
+        BinaryTreeNode newNode = new BinaryTreeNode(this.value);
+
+        if (this.left != null) {
+            newNode.left = this.left.clone();
+        }
+        if (this.right != null) {
+            newNode.right = this.right.clone();
+        }
+
+        return newNode;
     }
 }
