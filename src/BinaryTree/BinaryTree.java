@@ -72,7 +72,7 @@ public class BinaryTree {
     }
 
     public void createBinarySearchTree() {
-        root = null; // Resetting the root
+        root = null;
 
         Queue<Integer> tempQueue = new LinkedList<>();
 
@@ -83,16 +83,10 @@ public class BinaryTree {
         }
     }
 
-    /**
-     * Helper method to insert a value into the binary search tree.
-     */
     private void insertIntoBST(int value) {
         root = insertRecursive(root, value);
     }
 
-    /**
-     * Recursive method to insert a value into the binary search tree.
-     */
     private BinaryTreeNode insertRecursive(BinaryTreeNode node, int value) {
         if (node == null) {
             return new BinaryTreeNode(value);
